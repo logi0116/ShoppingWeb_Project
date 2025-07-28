@@ -59,7 +59,7 @@ public class OrderServicImpl implements OrderService {
         orderRepository.save(order);
 
         // 5. 장바구니 비우기
-        cartItemRepository.deleteByMemberId(memberId);
+//        cartRepository.deleteByMemberId(memberId);
 
     }
 }

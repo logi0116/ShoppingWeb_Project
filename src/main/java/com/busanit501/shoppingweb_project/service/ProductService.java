@@ -8,6 +8,7 @@ import com.busanit501.shoppingweb_project.dto.ProductResponseDto;
 
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.log4j.Log4j2;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -16,6 +17,7 @@ import java.util.stream.Collectors;
 @Service
 @RequiredArgsConstructor
 @Transactional
+@Log4j2
 public class ProductService {
 
     private final ProductRepository productRepository;
@@ -32,9 +34,11 @@ public class ProductService {
     }
 
     public List<ProductResponseDto> getAllProducts() {
-        return productRepository.findAll().stream()
+        List<ProductResponseDto> products = productRepository.findAll().stream()
                 .map(ProductResponseDto::new)
                 .collect(Collectors.toList());
+        log.info("ProductService에서 products 확인 : "+products);
+        return products;
     }
 
     public ProductResponseDto getProduct(Long productId) {
