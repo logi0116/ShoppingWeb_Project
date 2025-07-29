@@ -1,7 +1,7 @@
 package com.busanit501.shoppingweb_project.controller;
 
 import com.busanit501.shoppingweb_project.domain.Product;
-import com.busanit501.shoppingweb_project.dto.ProductResponseDto;
+import com.busanit501.shoppingweb_project.dto.ProductDTO;
 import com.busanit501.shoppingweb_project.service.ProductService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.java.Log;
@@ -11,6 +11,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.PathVariable;
 
 import java.util.List;
 
@@ -24,11 +25,11 @@ public class HomeController {
 
     @GetMapping("/home")
     public String home(Model model) {
-        List<ProductResponseDto> products = productService.getAllProducts();
-        for(ProductResponseDto product : products){
-            log.info("Controller 에서 product 이름 확인하는중 : " +  product.getProductName());
-        }
-        model.addAttribute("products", products);
+//        List<ProductDTO> products = productService.getAllProducts();
+//        for(ProductDTO product : products){
+//            log.info("Controller 에서 product 이름 확인하는중 : " +  product.getProductName());
+//        }
+//        model.addAttribute("products", products);
         return "home";
     }
 
@@ -52,8 +53,10 @@ public class HomeController {
         return "mypage";
     }
 
-    @GetMapping("/product-detail")
-    public String productDetail() {
+    @GetMapping("/products/{id}")
+    public String productDetail(@PathVariable Long id , Model model) {
+        model.addAttribute("productId", id);
         return "product-detail";
+        // 화면만 그렸음 대신( productId라는 데이터 하나만 가지고)
     }
 }

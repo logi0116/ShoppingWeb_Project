@@ -37,4 +37,10 @@ public class Review {
     public void prePersist() {
         this.createdAt = LocalDateTime.now();
     }
+
+    public void setProduct(Product product) {
+        this.product = product;
+        if (!product.getReviews().contains(this)) {
+            product.getReviews().add(this);
+        }    }
 }

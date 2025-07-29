@@ -19,6 +19,7 @@ import java.time.LocalDateTime;
 public class OrderDTO {
 
     private Long orderid;
+    // 나중에 어떤 order을 가져올지 알아야 해서
 
     private Long memberid;
 

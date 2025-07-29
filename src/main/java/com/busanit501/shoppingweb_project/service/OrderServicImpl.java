@@ -4,6 +4,8 @@ import com.busanit501.shoppingweb_project.domain.CartItem;
 import com.busanit501.shoppingweb_project.domain.Order;
 import com.busanit501.shoppingweb_project.domain.OrderItem;
 import com.busanit501.shoppingweb_project.domain.Product;
+import com.busanit501.shoppingweb_project.dto.CartItemDTO;
+import com.busanit501.shoppingweb_project.dto.ProductDTO;
 import com.busanit501.shoppingweb_project.repository.CartItemRepository;
 import com.busanit501.shoppingweb_project.repository.OrderRepository;
 import com.busanit501.shoppingweb_project.repository.ProductRepository;
@@ -11,6 +13,7 @@ import jakarta.transaction.Transactional;
 import lombok.Builder;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
+import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
@@ -61,5 +64,13 @@ public class OrderServicImpl implements OrderService {
         // 5. 장바구니 비우기
 //        cartRepository.deleteByMemberId(memberId);
 
+    }
+
+    @Override
+    public CartItemDTO AddCartItemFromProductDetail(CartItemDTO cartItemDTO) {
+        CartItem cartItem = new ModelMapper().map(cartItemDTO, CartItem.class);
+
+        cartItemRepository.save(cartItem);
+        return cartItemDTO;
     }
 }

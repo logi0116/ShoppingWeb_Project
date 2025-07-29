@@ -117,42 +117,54 @@
 
 <script th:src="@{/js/script.js}"></script>
 <script>
-    // 상품 상세 페이지로 이동 (home.html, product-detail.html 등에서 사용)
-    function goToProductDetail(productId) {
-        localStorage.setItem('selectedProductId', productId);
-        window.location.href = '/product-detail';
-    }
+    window.onload = initializeProductDetail;
+    // const urlParams = new URLSearchParams(window.location.search);
+    // const pproductId = urlPParams.get('id');
+    // fetch(`/api/products/${pproductId}`)
+    //     .then(res => res.json())
+    //     .then(product => {
+    //         document.getElementById('productName').textContent = product.productName;
+    //     })
 
     // 뒤로가기 (product-detail.html)
     function goBack() {
-        window.location.href = '/';
+        window.location.href = '/home';
     }
 
     // 상품 상세 페이지 초기화 (product-detail.html)
     function initializeProductDetail() {
-        const productId = parseInt(localStorage.getItem('selectedProductId'));
+        // const params = new URLSearchParams(window.location.search);
+        // const productId = params.get('id');
+        const pathSegments = window.location.pathname.split('/');
+        const productId = pathSegments[pathSegments.length - 1];
         if (!productId) {
-            window.location.href = '/';
+            window.location.href = '/home';
             return;
         }
-        // products 배열은 home.html에서 정의된 임시 데이터입니다.
-        // 실제로는 API 호출로 해당 상품 정보를 가져와야 합니다.
-        const product = products.find(p => p.id === productId);
-        if (!product) {
-            window.location.href = '/';
-            return;
-        }
-        displayProductDetail(product);
-        displayProductReviews(productId);
-        initializeReviewForm();
+
+        fetch(`/api/products/${productId}`) //productDTO
+            .then(res => {
+                if (!res.ok) throw new Error('상품 정보를 불러오지 못했습니다.');
+                return res.json();
+            })
+            .then(product => {
+                displayProductDetail(product);
+                updateProductRating(product.productId); // 리뷰쪽은 추후 연결
+                displayProductReviews(product.productId);
+                initializeReviewForm();
+            })
+            .catch(err => {
+                alert(err.message);
+                window.location.href = '/';
+            });
     }
 
     // 상품 상세 정보 표시 (product-detail.html)
     function displayProductDetail(product) {
         document.getElementById('productImageLarge').textContent = product.image;
-        document.getElementById('productCategory').textContent = product.category;
-        document.getElementById('productTitle').textContent = product.name;
-        document.getElementById('productPriceLarge').textContent = product.price.toLocaleString() + '원';
+        document.getElementById('productCategory').textContent = product.productTag;
+        document.getElementById('productTitle').textContent = product.productName;
+        document.getElementById('productPriceLarge').textContent = Number(product.price).toLocaleString() + '원';
         // 상품 설명 설정
         const descriptions = {
             '바지': '편안한 착용감과 스타일을 동시에 만족시키는 바지입니다. 다양한 상황에서 활용할 수 있는 베이직한 디자인으로 제작되었습니다.',
@@ -310,8 +322,9 @@
 
     // 상세 페이지에서 장바구니 담기 (product-detail.html)
     function addToCartFromDetail() {
-        const productId = parseInt(localStorage.getItem('selectedProductId'));
-        addToCart(productId);
+        const params = new URLSearchParams(window.location.search);
+        const productId = params.get('id');
+        addToCart(parseInt(productId));
     }
 </script>
 </body>

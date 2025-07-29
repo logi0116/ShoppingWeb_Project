@@ -94,10 +94,20 @@
 
 
 <script layout:fragment="script" th:inline="javascript">
-    const products = /*[[${products}]]*/ [];
-    console.log("📦 products from server:", products);
 
-    displayProducts(products);
+    // html이 렌더링 되기 전에 이 함수를 실행시켜라
+    // fetch -> RestAPI를 실행시키기 위한 명령어
+    window.onload = function(){
+        fetch('/api/products')
+            .then(response => response.json())
+            //data => RestAPI에서 받아온 데이터
+            .then(data => {
+                console.log("전체 상품 : ", data);
+                displayProducts(data);
+                window.allProducts = data;
+            });
+    }
+    // products라는 데이터가 전달 됨 List형식
 
     // 상품 표시 (home.html)
     function displayProducts(productsToShow) {
@@ -107,13 +117,14 @@
         productsToShow.forEach(product => {
             const productCard = document.createElement('div');
             productCard.className = 'product-card';
+
             productCard.innerHTML = `
             <div class="product-image">${product.image || '이미지 없음'}</div>
             <div class="product-info">
-                <h3 onclick="goToProductDetail(${product.id})">${product.productName}</h3> <!-- product.name으로 변경 -->
+                <h3 onclick="goToProductDetail(${product.productId})">${product.productName}</h3> <!-- product.name으로 변경 -->
                 <p>카테고리: ${product.productTag}</p> <!-- product.category로 변경 -->
-                <div class="product-price">${product.price.toLocaleString()}원</div>
-                <button class="add-to-cart-btn" onclick="addToCart(${product.id})">
+                <div class="product-price">${Number(product.price).toLocaleString()}원</div>
+                <button class="add-to-cart-btn" onclick="addToCart(${product.productId})">
                     장바구니 담기
                 </button>
             </div>
@@ -122,20 +133,58 @@
         });
     }
 
+    function goToProductDetail(productId) {
+        window.location.href = `/products/${productId}`; // 또는 /product-detail/${productId}
+        // 이 주소에 대한 Controller을 안만들었어요
+    }
+
+    function addToCart(productId) {
+        const payload = {
+            productId: productId,
+            memberId: 1,
+            quantity: 1
+        };
+
+        fetch('/api/cart', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(payload)
+        })
+            .then(res => {
+                if (!res.ok) {
+                    throw new Error('장바구니 추가에 실패했습니다.');
+                }
+                return res.json();
+            })
+            .then(data => {
+                alert(`🛒 ${data.productName}이(가) 장바구니에 추가되었습니다.`);
+                // 필요시 UI 업데이트 or 장바구니 수량 갱신
+                updateCartCount();
+            })
+            .catch(err => {
+                console.error(err);
+                alert('장바구니 추가 중 오류가 발생했습니다.');
+            });
+    }
+
     function filterByCategory(category) {
 
-        let filteredProducts = products.filter(product => {
-            return product.productTag === category;
-        });
-
-        displayProducts(filteredProducts);
+        fetch(`/api/products?category=${encodeURIComponent(category)}`)
+            .then(response => response.json())
+            .then(data => {
+                console.log("📂 카테고리 결과:", data);
+                displayProducts(data);
+            });
     }
 
 
     // 전체 상품 보기 (home.html)
     function showAllProducts() {
-        filteredProducts = products;
-        displayProducts(products);
+        fetch('/api/products')
+            .then(response => response.json())
+            .then(data => displayProducts(data));
     }
 
     // 상품 검색 (home.html)
@@ -143,14 +192,18 @@
         const searchInput = document.getElementById('searchInput');
         const searchTerm = searchInput.value.toLowerCase().trim();
         if (searchTerm === '') {
-            displayProducts(products);
+            fetch('/api/products')
+                .then(res => res.json())
+                .then(data => displayProducts(data));
             return;
         }
-        const searchResults = products.filter(product =>
-            product.name.toLowerCase().includes(searchTerm) ||
-            product.category.toLowerCase().includes(searchTerm)
-        );
-        displayProducts(searchResults);
+
+        fetch(`/api/products/search?keyword=${encodeURIComponent(searchTerm)}`)
+            .then(response => response.json())
+            .then(data => {
+                console.log(" 검색 결과 :", data)
+                displayProducts(data);
+            })
     }
 </script>
 <script src="/js/script.js"></script>

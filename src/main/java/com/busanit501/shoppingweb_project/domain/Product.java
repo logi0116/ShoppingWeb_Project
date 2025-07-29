@@ -38,6 +38,7 @@ public class Product {
     public void addStock(int quantity) {
         this.stock += quantity;
     }
+
     @OneToMany(mappedBy = "product", cascade = CascadeType.ALL, orphanRemoval = true)
     @Builder.Default
     private List<CartItem> cartItems = new ArrayList<>();
