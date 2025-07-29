@@ -7,9 +7,18 @@
     const searchButton = document.querySelector(".search-container button");
 
     if (!productGrid) return; // home.html이 아니면 실행 중단
-
+ 
+    let currentPage = 1;
+    let currentType = "nt";
+    let currentKeyword = "";
+ 
     // 1. 서버에 상품 데이터 요청하는 메인 함수
     function getProducts(page = 1, size = 8, type = "nt", keyword = "") {
+      // 현재 검색 상태를 전역 변수에 저장
+      currentPage = page;
+      currentType = type;
+      currentKeyword = keyword;
+ 
       const params = new URLSearchParams({
         page: page,
         size: size,
@@ -77,7 +86,8 @@
         btn.innerText = text;
         btn.className = "pagination-button";
         btn.addEventListener("click", () =>
-          getProducts(pageNum, 8, searchInput.value)
+          // 페이지 이동 시, 전역 변수에 저장된 현재 검색 상태를 사용
+          getProducts(pageNum, 8, currentType, currentKeyword)
         );
         return btn;
       };
