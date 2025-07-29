@@ -25,7 +25,8 @@ public class ProductRepositoryTests {
                 ProductCategory.DRESS,
                 ProductCategory.SHOES,
                 ProductCategory.BAG,
-                ProductCategory.ACC
+                ProductCategory.ACC,
+                ProductCategory.UNKNOWN // UNKNOWN 카테고리 추가
         };
 
         // 테스트 실행 시, 상품 데이터 100개를 DB에 자동으로 추가합니다.
