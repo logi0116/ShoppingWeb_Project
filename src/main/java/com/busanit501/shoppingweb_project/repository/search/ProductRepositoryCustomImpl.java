@@ -25,28 +25,40 @@ public class ProductRepositoryCustomImpl implements ProductRepositoryCustom {
     }
 
     @Override
-    public Page<Product> search(Pageable pageable) {
+    public Page<Product> search(PageRequestDTO pageRequestDTO) {
+        Pageable pageable = pageRequestDTO.getPageable("productId");
         QProduct product = QProduct.product;
-        
-        // 1. select...from...
+
         JPAQuery<Product> query = queryFactory.selectFrom(product);
 
-        // 2. where 조건 추가 (이 부분이 동적 쿼리의 핵심!)
-        // BooleanBuilder는 if문을 사용해 동적으로 where 절의 조건을 조립해주는 역할을 합니다.
         BooleanBuilder booleanBuilder = new BooleanBuilder();
-        
-        // 현재는 검색 조건이 없으므로 비워둡니다.
-        // 향후 PageRequestDTO에서 검색어를 받아와서 여기에 조건을 추가할 예정입니다.
-        // 예: if (pageRequestDTO.hasKeyword()) { ... }
+        String type = pageRequestDTO.getType();
+        String keyword = pageRequestDTO.getKeyword();
 
+        if (StringUtils.hasText(keyword) && StringUtils.hasText(type)) {
+            BooleanBuilder conditionBuilder = new BooleanBuilder();
+
+            if (type.contains("n")) { // 상품명 (productName)
+                conditionBuilder.or(product.productName.contains(keyword));
+            }
+            if (type.contains("t")) { // 상품 태그 (productTag)
+                conditionBuilder.or(product.productTag.stringValue().contains(keyword));
+            }
+
+            booleanBuilder.and(conditionBuilder);
+        }
         query.where(booleanBuilder);
 
-        // 3. 페이징 처리
         query.offset(pageable.getOffset()).limit(pageable.getPageSize());
 
-        // 4. 쿼리 실행
         List<Product> content = query.fetch();
-        long total = query.fetchCount(); // fetchCount()는 deprecated 되었지만, 간단한 예시로 사용.
+
+        // fetchCount() 대신 count 쿼리를 분리하여 실행
+        JPAQuery<Long> countQuery = queryFactory.select(product.count())
+                .from(product)
+                .where(booleanBuilder);
+
+        long total = countQuery.fetchOne();
 
         return new PageImpl<>(content, pageable, total);
     }
