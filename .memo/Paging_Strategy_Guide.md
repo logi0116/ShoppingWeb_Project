@@ -209,3 +209,38 @@
   - **상호작용:** 이 `Page<Product>` 객체는 `Service` 계층으로 전달되어, 최종적으로 `PageResponseDTO`를 만드는 데 사용된다.
 
 ---
+
+
+---
+
+### **[2025-07-29] 프론트엔드 페이징 구현 - review-paging.js 분석**
+
+- **담당자:** (본인 이름)
+- **관련 파일:** `static/js/review-paging.js`, `templates/product-detail.html`
+
+#### **1. 구현 목표 (The "Why")**
+
+- **(생각)** "백엔드에서 페이징된 댓글 데이터를 제공하는 API(`api/reviews/{productId}`)를 완성했으니, 이제 프론트엔드에서 이 API를 호출하여 실제 화면에 댓글 목록과 페이지 번호 버튼들을 그려줘야 한다. 이 모든 동적인 화면 처리 로직을 `product-detail.html`에 직접 넣으면 코드가 지저분해지니, `review-paging.js`라는 별도의 파일에 캡슐화하여 역할을 명확히 분리하기로 했다."
+
+#### **2. 핵심 동작 흐름 (AJAX)**
+
+1.  **페이지 로딩:** 사용자가 `product-detail.html` 페이지에 접속합니다.
+2.  **스크립트 실행:** 페이지 로딩이 완료되면, `review-paging.js`가 실행됩니다.
+3.  **API 호출 (1차):** `getReviews()` 함수가 자동으로 호출되어, 백엔드의 `api/reviews/{productId}?page=1&size=5` API로 첫 페이지 댓글 데이터를 요청합니다. (AJAX 통신)
+4.  **데이터 수신:** 백엔드는 `PageResponseDTO<ReviewDTO>` 객체를 JSON 데이터로 변환하여 응답합니다.
+5.  **화면 렌더링:** Javascript는 받아온 JSON 데이터를 사용하여 `displayReviews()` 함수로 댓글 목록 HTML을 만들고, `setupPagination()` 함수로 페이지 번호 버튼 HTML을 만들어 화면에 동적으로 그려줍니다.
+6.  **페이지 이동 (2차 이후):** 사용자가 페이지 번호 버튼(예: '2'번)을 클릭하면, `getReviews(2, 5)` 함수가 다시 호출되어 2페이지 데이터를 요청하고, 4~5번 과정을 반복합니다. 이 과정에서는 페이지 전체가 새로고침되지 않고, 댓글 목록과 페이징 영역만 부드럽게 변경됩니다.
+
+#### **3. 주요 함수 분석**
+
+- **`getReviews(page, size)`:**
+  - **역할:** 백엔드에 댓글 데이터를 요청하는 **'AJAX 통신'**의 핵심입니다. `fetch` API를 사용하여 비동기 GET 요청을 보냅니다.
+  - **상호작용:** `ReviewController`의 `@GetMapping("/{productId}")` 메소드와 직접 통신합니다.
+
+- **`displayReviews(reviews)`:**
+  - **역할:** 순수한 댓글 데이터 배열(`reviews`)을 받아서, `for`문을 돌며 동적으로 HTML 태그(`<div>`, `<span>` 등)를 생성하고, 최종적으로 화면에 표시하는 **'렌더링 엔진'**입니다.
+
+- **`setupPagination(pageData)`:**
+  - **역할:** `PageResponseDTO` 객체(`pageData`)를 통째로 받아서, `pageNumList`, `prev`, `next` 등의 정보를 조합하여 페이지네이션 UI(버튼 목록)를 동적으로 생성하는 **'UI 빌더'**입니다.
+
+---

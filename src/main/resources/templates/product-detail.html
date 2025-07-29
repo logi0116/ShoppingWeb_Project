@@ -109,7 +109,11 @@
 
             <!-- 리뷰 목록 -->
             <div class="review-list" id="reviewList">
-                <!-- JavaScript로 동적 생성 -->
+                <!-- review-paging.js로 동적 생성 -->
+            </div>
+            <!-- 페이지네이션 UI가 생성될 영역 -->
+            <div class="pagination" id="reviewPagination">
+                <!-- review-paging.js로 동적 생성 -->
             </div>
         </div>
     </div>
@@ -117,24 +121,16 @@
 
 <script th:src="@{/js/script.js}"></script>
 <script>
-    window.onload = initializeProductDetail;
-    // const urlParams = new URLSearchParams(window.location.search);
-    // const pproductId = urlPParams.get('id');
-    // fetch(`/api/products/${pproductId}`)
-    //     .then(res => res.json())
-    //     .then(product => {
-    //         document.getElementById('productName').textContent = product.productName;
-    //     })
+    // 리뷰 관련 로직은 모두 review-paging.js로 이전되었습니다.
+    // 여기서는 상품 상세 정보 로딩 및 리뷰와 관련 없는 기능만 남겨둡니다.
 
-    // 뒤로가기 (product-detail.html)
+    window.onload = initializeProductDetail;
+
     function goBack() {
         window.location.href = '/home';
     }
 
-    // 상품 상세 페이지 초기화 (product-detail.html)
     function initializeProductDetail() {
-        // const params = new URLSearchParams(window.location.search);
-        // const productId = params.get('id');
         const pathSegments = window.location.pathname.split('/');
         const productId = pathSegments[pathSegments.length - 1];
         if (!productId) {
@@ -142,15 +138,15 @@
             return;
         }
 
-        fetch(`/api/products/${productId}`) //productDTO
+        fetch(`/api/products/${productId}`)
             .then(res => {
                 if (!res.ok) throw new Error('상품 정보를 불러오지 못했습니다.');
                 return res.json();
             })
             .then(product => {
                 displayProductDetail(product);
-                updateProductRating(product.productId); // 리뷰쪽은 추후 연결
-                displayProductReviews(product.productId);
+                // TODO: 평점 정보는 리뷰 API 응답과 통합하여 표시해야 합니다.
+                // updateProductRating(product.productId);
                 initializeReviewForm();
             })
             .catch(err => {
@@ -159,82 +155,15 @@
             });
     }
 
-    // 상품 상세 정보 표시 (product-detail.html)
     function displayProductDetail(product) {
         document.getElementById('productImageLarge').textContent = product.image;
         document.getElementById('productCategory').textContent = product.productTag;
         document.getElementById('productTitle').textContent = product.productName;
         document.getElementById('productPriceLarge').textContent = Number(product.price).toLocaleString() + '원';
-        // 상품 설명 설정
-        const descriptions = {
-            '바지': '편안한 착용감과 스타일을 동시에 만족시키는 바지입니다. 다양한 상황에서 활용할 수 있는 베이직한 디자인으로 제작되었습니다.',
-            '신발': '발의 편안함을 최우선으로 고려한 신발입니다. 고품질 소재를 사용하여 내구성과 스타일을 모두 갖추었습니다.',
-            '상의': '부드러운 소재와 세련된 디자인이 특징인 상의입니다. 일상복으로도, 외출복으로도 완벽한 아이템입니다.',
-            '아우터': '추운 날씨에도 따뜻함을 유지해주는 아우터입니다. 실용성과 패션성을 모두 고려한 디자인입니다.'
-        };
-        document.getElementById('productDescription').textContent = descriptions[product.category] || '고품질 상품입니다.';
-        // 평점 정보 업데이트
-        updateProductRating(product.id);
+        document.getElementById('productDescription').textContent = '고품질 상품입니다.'; // 임시 설명
     }
 
-    // 상품 평점 정보 업데이트 (product-detail.html)
-    function updateProductRating(productId) {
-        const productReviews = reviews.filter(review => review.productId === productId);
-        const averageRating = productReviews.length > 0
-            ? productReviews.reduce((sum, review) => sum + review.rating, 0) / productReviews.length
-            : 0;
-        const starsContainer = document.getElementById('averageStars');
-        const ratingScore = document.getElementById('averageRating');
-        const reviewCount = document.getElementById('reviewCount');
-        starsContainer.innerHTML = renderStars(Math.round(averageRating));
-        ratingScore.textContent = averageRating.toFixed(1);
-        reviewCount.textContent = `(${productReviews.length}개 리뷰)`;
-    }
-
-    // 별점 렌더링 (product-detail.html)
-    function renderStars(rating) {
-        let starsHTML = '';
-        for (let i = 1; i <= 5; i++) {
-            if (i <= rating) {
-                starsHTML += '<span class="star">★</span>';
-            } else {
-                starsHTML += '<span class="star empty">★</span>';
-            }
-        }
-        return starsHTML;
-    }
-
-    // 상품 리뷰 표시 (product-detail.html)
-    function displayProductReviews(productId) {
-        const productReviews = reviews.filter(review => review.productId === productId);
-        const reviewList = document.getElementById('reviewList');
-        if (productReviews.length === 0) {
-            reviewList.innerHTML = `
-            <div class="no-reviews">
-                <p>아직 리뷰가 없습니다. 첫 번째 리뷰를 작성해보세요!</p>
-            </div>
-        `;
-            return;
-        }
-        reviewList.innerHTML = '';
-        productReviews.slice().reverse().forEach(review => {
-            const reviewItem = document.createElement('div');
-            reviewItem.className = 'review-item';
-            reviewItem.innerHTML = `
-            <div class="review-header">
-                <div class="review-user-info">
-                    <div class="review-user-name">${review.userName}</div>
-                    <div class="review-date">${review.date}</div>
-                </div>
-                <div class="review-rating">${renderStars(review.rating)}</div>
-            </div>
-            <div class="review-comment">${review.comment}</div>
-        `;
-            reviewList.appendChild(reviewItem);
-        });
-    }
-
-    // 리뷰 폼 초기화 (product-detail.html)
+    // 리뷰 폼 초기화 (로그인 여부에 따라 폼 표시/숨김)
     function initializeReviewForm() {
         const reviewWriteContainer = document.getElementById('reviewWriteContainer');
         const loginRequired = document.getElementById('loginRequired');
@@ -327,5 +256,7 @@
         addToCart(parseInt(productId));
     }
 </script>
+<!-- 댓글 페이징 스크립트 로드 -->
+<script th:src="@{/js/review-paging.js}"></script>
 </body>
 </html>
