@@ -2,12 +2,17 @@ package com.busanit501.shoppingweb_project.service;
 
 import com.busanit501.shoppingweb_project.domain.Product;
 import com.busanit501.shoppingweb_project.dto.ProductDTO;
+import com.busanit501.shoppingweb_project.dto.PageRequestDTO;
+import com.busanit501.shoppingweb_project.dto.PageResponseDTO;
 
 import java.util.List;
 
 public interface ProductService {
     // 단건 조회
     ProductDTO getProductById(Long productId);
+
+    // 목록 조회 (페이징, 검색 기능 통합)
+    PageResponseDTO<ProductDTO> getProductList(PageRequestDTO pageRequestDTO);
 
     // 전체 목록 조회
     List<ProductDTO> getAllProducts();
@@ -18,7 +23,7 @@ public interface ProductService {
     // 키워드 검색
     List<ProductDTO> searchProducts(String keyword);
 
-    default Product dtoToEntity(ProductDTO productDTO){
+    default Product dtoToEntity(ProductDTO productDTO) {
         Product product = Product.builder()
                 .productId(productDTO.getProductId())
                 .productName(productDTO.getProductName())
@@ -27,7 +32,8 @@ public interface ProductService {
                 .build();
         return product;
     }
-    default ProductDTO entityToDto(Product product){
+
+    default ProductDTO entityToDto(Product product) {
         ProductDTO productDTO = ProductDTO.builder()
                 .productId(product.getProductId())
                 .productName(product.getProductName())
