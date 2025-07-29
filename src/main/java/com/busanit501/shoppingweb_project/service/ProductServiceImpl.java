@@ -88,7 +88,11 @@ public class ProductServiceImpl implements ProductService {
         // [1단계] Repository 계층을 호출하여 Page<Product> 결과를 받음
         Page<Product> result = productRepository.search(pageRequestDTO);
 
-        // TODO: [2단계] Page<Product>를 PageResponseDTO<ProductDTO>로 변환
+        List<ProductDTO> dtoList = result.getContent().stream()
+                .map(this::entityToDto)
+                .collect(Collectors.toList());
+
+        // TODO: [마지막 단계] 최종 PageResponseDTO 객체 생성하여 반환
         return null;
     }
 }
