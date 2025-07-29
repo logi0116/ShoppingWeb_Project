@@ -26,8 +26,7 @@ public class ProductController {
     // category를 선택하면 category에 해당 되는 상품만 불러온다.
     public PageResponseDTO<ProductDTO> getAllProducts(PageRequestDTO pageRequestDTO) {
         log.info("getAllProducts ....." + pageRequestDTO);
-        // TODO: 서비스 호출 및 결과 반환 (다음 커밋에서 구현)
-        return null;
+        return productService.getProductList(pageRequestDTO);
     }
 
     @GetMapping("/search")
