@@ -92,7 +92,10 @@ public class ProductServiceImpl implements ProductService {
                 .map(this::entityToDto)
                 .collect(Collectors.toList());
 
-        // TODO: [마지막 단계] 최종 PageResponseDTO 객체 생성하여 반환
-        return null;
+        return PageResponseDTO.<ProductDTO>withAll()
+                .pageRequestDTO(pageRequestDTO)
+                .dtoList(dtoList)
+                .totalCount(result.getTotalElements())
+                .build();
     }
 }
