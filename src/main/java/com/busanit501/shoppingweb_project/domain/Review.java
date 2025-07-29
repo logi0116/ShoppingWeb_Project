@@ -9,7 +9,6 @@ import java.time.LocalDateTime;
 
 @Entity
 @Getter
-@Setter
 @NoArgsConstructor
 @Table(name = "reviews")
 public class Review {
@@ -27,11 +26,9 @@ public class Review {
     @Column(nullable = false, updatable = false)
     private LocalDateTime createdAt;
 
-
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "product_id", nullable = false)
     private Product product;
-
 
     @PrePersist
     public void prePersist() {
@@ -42,5 +39,6 @@ public class Review {
         this.product = product;
         if (!product.getReviews().contains(this)) {
             product.getReviews().add(this);
-        }    }
+        }
+    }
 }

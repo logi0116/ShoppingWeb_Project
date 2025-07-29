@@ -39,6 +39,7 @@ public interface ProductService {
                 .productName(product.getProductName())
                 .price(product.getPrice())
                 .stock(product.getStock())
+                .productTag(product.getProductTag()) // Enum 객체 그대로 전달
                 .build();
         return productDTO;
     }
