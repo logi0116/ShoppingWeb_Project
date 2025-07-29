@@ -7,8 +7,10 @@ import org.springframework.stereotype.Repository;
 
 import java.util.List;
 
+import com.busanit501.shoppingweb_project.repository.search.ReviewRepositoryCustom;
+
 @Repository
-public interface ReviewRepository extends JpaRepository<Review, Long> {
+public interface ReviewRepository extends JpaRepository<Review, Long>, ReviewRepositoryCustom {
     @Query("select b from Product b where b.productId = :productId")
     List<Review> findByProductId(Long productId);
 }
