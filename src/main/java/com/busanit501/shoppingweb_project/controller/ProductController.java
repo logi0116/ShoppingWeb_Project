@@ -1,15 +1,12 @@
 package com.busanit501.shoppingweb_project.controller;
 
 import com.busanit501.shoppingweb_project.dto.ProductDTO;
-import com.busanit501.shoppingweb_project.dto.ProductDTO;
 import com.busanit501.shoppingweb_project.dto.PageRequestDTO;
 import com.busanit501.shoppingweb_project.dto.PageResponseDTO;
 import com.busanit501.shoppingweb_project.service.ProductService;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -22,20 +19,21 @@ public class ProductController {
 
     private final ProductService productService;
 
-    @GetMapping // 화면에 렌더링 될 때 category를 선택하지 않으면 모든 상품을 불러오고
-    // category를 선택하면 category에 해당 되는 상품만 불러온다.
+    @GetMapping
     public PageResponseDTO<ProductDTO> getAllProducts(PageRequestDTO pageRequestDTO) {
         log.info("getAllProducts ....." + pageRequestDTO);
         return productService.getProductList(pageRequestDTO);
     }
 
-    @GetMapping("/search")
-    public List<ProductDTO> searchProducts(@RequestParam String keyword) {
-        // @RequestParam => URL 에 붙은 ?key=value형식의 값을 받아오게 암시해주는 어노테이션
-        List<ProductDTO> products = productService.searchProducts(keyword);
-        log.info(keyword + "가 포함된 데이터 : " + keyword);
-        return products;
-    }
+    /*
+     * @GetMapping("/search")
+     * public List<ProductDTO> searchProducts(@RequestParam String keyword) {
+     * // @RequestParam => URL 에 붙은 ?key=value형식의 값을 받아오게 암시해주는 어노테이션
+     * List<ProductDTO> products = productService.searchProducts(keyword);
+     * log.info(keyword + "가 포함된 데이터 : " + keyword);
+     * return products;
+     * }
+     */
 
     @GetMapping("/{productId}")
     public ProductDTO getProductById(@PathVariable Long productId) {
