@@ -6,6 +6,7 @@ import com.busanit501.shoppingweb_project.domain.enums.ProductCategory;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.annotation.Commit;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
@@ -66,7 +67,8 @@ public class ProductRepositoryTests {
     //      DB에 충분한 양의 댓글 데이터가 미리 존재해야 합니다.
     //      이 테스트를 한번 실행하면, 1번 상품에 20개의 댓글이 자동으로 생성됩니다.
     @Test
-    @Transactional // Product와 Review를 함께 다루므로 트랜잭션 처리가 안전합니다.
+    @Transactional
+    @Commit // 테스트가 완료된 후 트랜잭션을 롤백하지 않고 커밋하도록 설정합니다.
     public void insertReviewsTest() {
         // 1번 상품을 대상으로 리뷰를 작성합니다.
         Long targetProductId = 1L;
