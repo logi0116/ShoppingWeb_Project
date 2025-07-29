@@ -1,12 +1,15 @@
 package com.busanit501.shoppingweb_project.repository.search;
 
+import com.busanit501.shoppingweb_project.domain.QReview;
 import com.busanit501.shoppingweb_project.domain.Review;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Repository;
 
 import jakarta.persistence.EntityManager;
+import java.util.List;
 
 @Repository
 public class ReviewRepositoryCustomImpl implements ReviewRepositoryCustom {
@@ -21,7 +24,24 @@ public class ReviewRepositoryCustomImpl implements ReviewRepositoryCustom {
 
     @Override
     public Page<Review> getReviewsByProductId(Long productId, Pageable pageable) {
-        // TODO: 다음 커밋에서 Querydsl을 이용한 실제 쿼리 로직을 구현할 예정입니다.
-        return null;
+        QReview review = QReview.review;
+
+        // select from review where product_id = ? order by createdAt desc limit ?, ?
+        List<Review> content = queryFactory
+                .selectFrom(review)
+                .where(review.product.productId.eq(productId))
+                .orderBy(review.createdAt.desc())
+                .offset(pageable.getOffset())
+                .limit(pageable.getPageSize())
+                .fetch();
+
+        // select count(review) from review where product_id = ?
+        long total = queryFactory
+                .select(review.count())
+                .from(review)
+                .where(review.product.productId.eq(productId))
+                .fetchOne();
+
+        return new PageImpl<>(content, pageable, total);
     }
 }
