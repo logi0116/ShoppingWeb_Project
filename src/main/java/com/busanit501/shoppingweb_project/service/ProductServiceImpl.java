@@ -2,6 +2,8 @@ package com.busanit501.shoppingweb_project.service;
 
 import com.busanit501.shoppingweb_project.domain.Product;
 import com.busanit501.shoppingweb_project.domain.enums.ProductCategory;
+import com.busanit501.shoppingweb_project.dto.PageRequestDTO;
+import com.busanit501.shoppingweb_project.dto.PageResponseDTO;
 import com.busanit501.shoppingweb_project.dto.ProductDTO;
 import com.busanit501.shoppingweb_project.repository.ProductRepository;
 import jakarta.transaction.Transactional;
@@ -20,7 +22,6 @@ import java.util.stream.Collectors;
 public class ProductServiceImpl implements ProductService {
 
     private final ProductRepository productRepository;
-
 
     @Override
     public ProductDTO getProductById(Long productId) {
@@ -79,5 +80,18 @@ public class ProductServiceImpl implements ProductService {
                         .productTag(ProductCategory.valueOf(product.getProductTag().name())) // Enum → String
                         .build())
                 .toList();
+    }
+
+    /**
+     * 페이징 및 동적 검색을 지원하는 상품 목록 조회 메소드
+     * 
+     * @param pageRequestDTO 페이징/검색 요청 정보
+     * @return 페이징된 상품 목록 응답
+     */
+    @Override
+    public PageResponseDTO<ProductDTO> getProductList(PageRequestDTO pageRequestDTO) {
+        // [1단계] Repository 계층을 호출하여 Page<Product> 결과를 받음 (다음 커밋에서 구현)
+        // [2단계] Page<Product>를 PageResponseDTO<ProductDTO>로 변환 (그 다음 커밋에서 구현)
+        return null;
     }
 }
