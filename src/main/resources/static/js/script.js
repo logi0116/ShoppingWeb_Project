@@ -33,7 +33,9 @@ function initializePage() {
   const currentPath = window.location.pathname;
   if (currentPath === "/" || currentPath.includes("home")) {
     // home.html (메인 페이지)
-    displayProducts(products); // 상품 목록 표시
+    // [lsr/fix] 페이징 기능과의 충돌을 막기 위해 이 부분을 주석 처리합니다.
+    // 초기 상품 목록 로딩은 home-paging.js가 전담합니다.
+    // displayProducts(products);
   } else if (currentPath.includes("cart")) {
     // cart.html (장바구니 페이지)
     displayCartItems(); // 장바구니 아이템 표시
