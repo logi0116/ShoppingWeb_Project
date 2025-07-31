@@ -63,7 +63,7 @@ public class OrderServicImpl implements OrderService {
 
         for (CartItem cart : cartItems) {
             Product product = cart.getProduct();
-
+            product.removeStock(cart.getQuantity());
             BigDecimal itemTotal = product.getPrice().multiply(BigDecimal.valueOf(cart.getQuantity()));
             total = total.add(itemTotal);
 

@@ -2,6 +2,7 @@ package com.busanit501.shoppingweb_project.service;
 
 import com.busanit501.shoppingweb_project.domain.Product;
 import com.busanit501.shoppingweb_project.domain.enums.ProductCategory;
+import com.busanit501.shoppingweb_project.dto.ProductDTO;
 import com.busanit501.shoppingweb_project.repository.ProductRepository;
 import lombok.extern.log4j.Log4j2;
 import org.junit.jupiter.api.Test;
@@ -75,8 +76,14 @@ public class ProductServiceTests {
         log.info("재고 (Stock) : " + product.getStock());
         log.info("카테고리 (Tag) : " + product.getProductTag());
 
+        ProductDTO productDTO = ProductDTO.builder()
+                .productName("테스트")
+                .price(BigDecimal.valueOf(5000))
+                .stock(20)
+                .productTag(ProductCategory.OUTER)
+                .build();
         // 상품 내용 수정 (아래 메서드는 직접 구현해야 합니다)
-        product.changeTitleContent("테스트 수정", new BigDecimal("50000"), 20, ProductCategory.OUTER);
+        product.changeTitleContent(productDTO);
 
         // 수정된 상품 저장 (JPA가 update 쿼리 자동 실행)
         productRepository.save(product);
@@ -90,7 +97,7 @@ public class ProductServiceTests {
 
     @Test
     public void testDeleteProduct() {
-        Long productId = 8L; // 삭제할 상품 ID
+        Long productId = 1L; // 삭제할 상품 ID
 
         // 삭제 전 존재 여부 확인 (Optional로 안전하게 처리)
         Optional<Product> result = productRepository.findById(productId);

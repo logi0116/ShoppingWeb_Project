@@ -35,9 +35,9 @@ public class MemberServiceImpl implements MemberService {
         boolean isAdmin = false;
 
         if (isAdmin) {
-            member.setRole("ROLE_ADMIN");
+            member.settingRole("ROLE_ADMIN");
         } else {
-            member.setRole("ROLE_USER");
+            member.settingRole("ROLE_USER");
         }
 
         // 주소가 있다면 Address도 생성 후 관계 연결

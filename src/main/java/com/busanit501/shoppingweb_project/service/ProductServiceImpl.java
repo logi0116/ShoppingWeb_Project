@@ -125,7 +125,7 @@ public class ProductServiceImpl implements ProductService {
         productRepository.save(product);
     }
 
-    // [추가] 새 상품 등록 메서드 구현
+    // 새 상품 등록 메서드 구현
     @Override
     public ProductDTO createProduct(ProductDTO productDTO) {
         if (productDTO.getProductTag() == null) {
@@ -136,19 +136,19 @@ public class ProductServiceImpl implements ProductService {
         return entityToDto(saved);
     }
 
-    // [추가] 상품 수정 메서드 구현
+    // 상품 수정 메서드 구현
     @Override
     public ProductDTO updateProduct(Long productId, ProductDTO productDTO) {
+        log.info("ProductService에서 작업중 수정된 ProductDTO : "+productDTO.getProductName());
         Product product = productRepository.findById(productId)
                 .orElseThrow(() -> new IllegalArgumentException("상품이 없습니다. id=" + productId));
-        product.setProductName(productDTO.getProductName());
-        product.setPrice(productDTO.getPrice());
-        product.setStock(productDTO.getStock());
-        Product updated = productRepository.save(product);
-        return entityToDto(updated);
+        // 상품 정보 수정
+        product.changeTitleContent(productDTO);
+        log.info("ProductService에서 작업중 수정된 Product : "+product.getProductName());
+        return entityToDto(product);
     }
 
-    // [추가] 상품 삭제 메서드 구현
+    // 상품 삭제 메서드 구현
     @Override
     public void deleteProduct(Long productId) {
         productRepository.deleteById(productId);

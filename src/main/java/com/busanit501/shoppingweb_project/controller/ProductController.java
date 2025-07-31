@@ -86,6 +86,7 @@ public class ProductController {
 
     @PutMapping("/{productId}")
     public ResponseEntity<ProductDTO> updateProduct(@PathVariable Long productId, @RequestBody ProductDTO requestDto) {
+        log.info("ProductControllerRestAPI에서 작업중 화면에서 가져온 데이터 확인중 : productId "+ productId+"productDTO : "+ requestDto.getProductName());
         ProductDTO updatedProduct = productService.updateProduct(productId, requestDto);
         return ResponseEntity.ok(updatedProduct);
     }

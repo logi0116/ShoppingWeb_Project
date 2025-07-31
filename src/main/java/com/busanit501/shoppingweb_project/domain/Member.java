@@ -1,10 +1,7 @@
 package com.busanit501.shoppingweb_project.domain;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -12,7 +9,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Entity
-@Data
+@Getter
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
@@ -38,11 +35,16 @@ public class Member {
     @Column(nullable = false)
     private String role;
 
+
     @Column(nullable = false)
     private boolean social;
 
     @Builder.Default
     @OneToMany(mappedBy = "member", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Address> addresses = new ArrayList<>();
+
+    public void settingRole(String role){
+        this.role = role;
+    }
 
 }

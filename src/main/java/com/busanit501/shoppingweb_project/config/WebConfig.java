@@ -9,7 +9,7 @@ public class WebConfig implements WebMvcConfigurer {
 
     @Override
     public void addResourceHandlers(ResourceHandlerRegistry registry) {
-        // URL 패턴 /images/** → 로컬 디스크 C:/upload_images/ 폴더 매핑
+        // /images/** 요청을 로컬 C:/upload_images 폴더에 매핑
         registry.addResourceHandler("/images/**")
                 .addResourceLocations("file:///C:/upload_images/");
     }

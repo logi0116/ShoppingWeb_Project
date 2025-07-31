@@ -12,19 +12,28 @@
           integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH"
           crossorigin="anonymous">
 </head>
-<body>
-<header class="header">
-    <div class="container">
+<body><header class="header bg-light border-bottom py-3">
+    <div class="container d-flex justify-content-between align-items-center">
+        <!-- 로고 영역 -->
         <div class="logo">
-            <h1><a th:href="@{/home}">Fashion Store</a></h1>
+            <h1 class="h4 mb-0">
+                <a class="text-decoration-none text-dark" th:href="@{/home}">Fashion Store</a>
+            </h1>
         </div>
+
+        <!-- 네비게이션 버튼 영역 -->
         <nav class="nav">
-            <div class="nav-buttons">
-                <button onclick="goToMyPage()">마이페이지</button>
-                    <div sec:authorize="!isAuthenticated()">
-                <button onclick="goToLogin()" id="loginBtn">로그인</button>
-                <button onclick="logout()" id="logoutBtn" style="display: none;">로그아웃</button>
-                    </div>
+            <div class="d-flex align-items-center gap-3">
+                <!-- 마이페이지 -->
+                <button class="btn btn-outline-primary btn-sm" onclick="goToMyPage()">마이페이지</button>
+
+                <!-- 로그인 상태에 따라 표시 -->
+                <div sec:authorize="!isAuthenticated()">
+                    <button class="btn btn-outline-success btn-sm" onclick="goToLogin()" id="loginBtn">로그인</button>
+                </div>
+                <div sec:authorize="isAuthenticated()">
+                    <button class="btn btn-outline-danger btn-sm" onclick="logout()" id="logoutBtn">로그아웃</button>
+                </div>
             </div>
         </nav>
     </div>

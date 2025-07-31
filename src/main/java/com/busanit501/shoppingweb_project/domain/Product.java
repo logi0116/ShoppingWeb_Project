@@ -1,6 +1,7 @@
 package com.busanit501.shoppingweb_project.domain;
 
 import com.busanit501.shoppingweb_project.domain.enums.ProductCategory;
+import com.busanit501.shoppingweb_project.dto.ProductDTO;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -11,7 +12,7 @@ import java.util.List;
 @Entity
 @Builder
 @Getter
-@Setter
+
 @NoArgsConstructor
 @AllArgsConstructor
 @Table(name = "products")
@@ -65,12 +66,14 @@ public class Product {
         review.setProduct(null);
     }
 
-    public void changeTitleContent(String productName, BigDecimal price, int stock, ProductCategory productTag) {
-        this.productName = productName;
-        this.price = price;
-        this.stock = stock;
-        this.productTag = productTag;
+    public void changeTitleContent(ProductDTO productDTO) {
+        this.productName = productDTO.getProductName();
+        this.price = productDTO.getPrice();
+        this.stock = productDTO.getStock();
+        this.productTag = productDTO.getProductTag();
     }
+
+
 
 }
 
