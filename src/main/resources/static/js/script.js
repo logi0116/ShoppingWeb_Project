@@ -33,9 +33,9 @@ function initializePage() {
   const currentPath = window.location.pathname;
   if (currentPath === "/" || currentPath.includes("home")) {
     // home.html (메인 페이지)
-    // [lsr/fix] 페이징 기능과의 충돌을 막기 위해 이 부분을 주석 처리합니다.
-    // 초기 상품 목록 로딩은 home-paging.js가 전담합니다.
-    // displayProducts(products);
+    // [fix] 페이징 기능과의 충돌을 막기 위해 이 블록의 내용을 비워둡니다.
+    // home.html의 초기 로딩은 home-paging.js가 전담합니다.    
+    // // displayProducts(products);
   } else if (currentPath.includes("cart")) {
     // cart.html (장바구니 페이지)
     displayCartItems(); // 장바구니 아이템 표시
@@ -193,24 +193,25 @@ document.addEventListener("DOMContentLoaded", () => {
   const confirmPassword = document.getElementById("confirmPassword");
   const passwordHelp = document.getElementById("passwordHelp");
 
-  // [lsr/fix] confirmPassword 요소가 페이지에 존재할 때만 이벤트 리스너를 추가하도록 수정
   if (password && confirmPassword && passwordHelp) {
     confirmPassword.addEventListener("input", function () {
       if (password.value !== confirmPassword.value) {
         passwordHelp.style.display = "block";
-    } else {
-      passwordHelp.style.display = "none";
-    }
-  });
+      } else {
+        passwordHelp.style.display = "none";
+      }
+    });
 
-  const form = document.getElementById("signupForm");
-  form.addEventListener("submit", function (e) {
-    if (password.value !== confirmPassword.value) {
-      e.preventDefault();
-      alert("비밀번호가 일치하지 않습니다.");
-      confirmPassword.focus();
+    const form = document.getElementById("signupForm");
+    if (form) {
+        form.addEventListener("submit", function (e) {
+            if (password.value !== confirmPassword.value) {
+            e.preventDefault();
+            alert("비밀번호가 일치하지 않습니다.");
+            confirmPassword.focus();
+            }
+        });
     }
-  });
   }
 });
 
