@@ -1,6 +1,6 @@
 // ==================================================
 // [lsr/feature/paging] home.html 전용 페이징 및 검색 스크립트
-// "수정보다는 추가" 원칙에 따라, 기존 HTML/JS를 건드리지 않고 이벤트 리스너를 통해 기능을 덧씌웁니다.
+// "수정보다는 추가" 원칙에 따라, 기존 HTML/JS를 건드리지 않고 기능을 덧씌웁니다.
 // ==================================================
 
 // 1. 상태 관리를 위한 전역 변수
@@ -10,8 +10,29 @@ let currentCategory = "";
 
 // 2. 페이지가 완전히 로드되면 페이징 기능을 초기화하고 이벤트를 연결합니다.
 document.addEventListener("DOMContentLoaded", () => {
+
+  // [lsr/fix] home.html의 displayProducts 함수를 덮어써서 페이징 객체와 배열 모두 처리 가능하도록 개선
+  if (typeof displayProducts === "function") {
+    const originalDisplayProducts = displayProducts; // 기존 함수 백업
+    displayProducts = function (productsToShow) {
+      // 데이터가 배열인지, 페이징 객체인지 확인하여 실제 상품 목록을 추출합니다.
+      const products = Array.isArray(productsToShow)
+        ? productsToShow
+        : (productsToShow && productsToShow.dtoList); // productsToShow가 null이 아닌지 확인
+
+      if (!products) {
+        console.warn("표시할 상품 데이터가 없습니다.", productsToShow);
+        // 상품이 없을 때 productGrid를 비워줍니다.
+        const productGrid = document.getElementById("productGrid");
+        if(productGrid) productGrid.innerHTML = "<p>상품이 없습니다.</p>";
+        return;
+      }
+      // 백업해둔 원래 함수에 정제된 데이터를 넣어 호출
+      originalDisplayProducts(products);
+    };
+  }
+
   // 2-1. 기존 window.onload의 역할을 완전히 대체하는 새로운 함수를 정의합니다.
-  // 이렇게 하면 home.html의 기존 코드를 수정하지 않고도 초기 로딩 동작을 변경할 수 있습니다.
   window.onload = function() {
     console.log("home-paging.js에 의해 재정의된 onload가 실행됩니다.");
     currentKeyword = '';
@@ -23,7 +44,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const searchButton = document.querySelector(".search-container button");
   if (searchButton) {
     searchButton.onclick = (event) => {
-      event.preventDefault(); // 기존 onclick의 동작을 막을 수 있습니다.
+      event.preventDefault(); 
       const searchInput = document.getElementById("searchInput");
       currentKeyword = searchInput.value.trim();
       currentCategory = "";
@@ -37,7 +58,7 @@ document.addEventListener("DOMContentLoaded", () => {
     searchInput.addEventListener("keypress", function (event) {
       if (event.key === "Enter") {
         event.preventDefault();
-        searchButton.click(); // 위에서 새로 정의한 검색 버튼 클릭을 실행
+        if(searchButton) searchButton.click();
       }
     });
   }
@@ -49,8 +70,6 @@ document.addEventListener("DOMContentLoaded", () => {
     if (!categoryH3) return;
 
     const category = categoryH3.textContent;
-    // '기타/알 수 없음' 같은 특수 카테고리명 처리를 위해 dataset을 사용하는 것이 더 안정적일 수 있으나,
-    // 현재 구조에서는 h3 텍스트를 그대로 활용합니다.
     let categoryValue = category;
     if (category === "바지") categoryValue = "하의";
     else if (category === "악세서리") categoryValue = "액세서리";
@@ -96,9 +115,8 @@ function fetchAndDisplayProducts(page) {
       return response.json();
     })
     .then((pageData) => {
-      // home.html에 원래 있던 함수를 재활용하여 상품 목록을 표시
-      displayProducts(pageData.dtoList);
-      // 페이지네이션 버튼을 새로 그림
+      // 덮어쓴 displayProducts 함수를 호출합니다.
+      displayProducts(pageData); 
       renderPagination(pageData);
     })
     .catch((error) => {
