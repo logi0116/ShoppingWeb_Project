@@ -63,3 +63,4 @@ out/
 .memo/Today_Summary.md
 .gitignore
 .gitignore
+src/main/resources/application.properties
