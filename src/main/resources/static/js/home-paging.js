@@ -79,6 +79,17 @@ function initializePaging() {
       fetchAndDisplayProducts(1);
     };
   }
+
+  // 로그아웃 버튼 이벤트 연결
+  const logoutLink = document.querySelector('a[href="/logout"]');
+  if (logoutLink) {
+    console.log("DEBUG: 로그아웃 링크 이벤트 리스너 연결됨.");
+    logoutLink.onclick = (event) => {
+      event.preventDefault();
+      // Spring Security의 로그아웃 URL로 이동
+      window.location.href = "/logout";
+    };
+  }
 }
 
 /**
