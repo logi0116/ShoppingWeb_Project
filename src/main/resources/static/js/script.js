@@ -111,6 +111,10 @@ function goToCart() {
 function goToMyPage() {
   window.location.href = "/mypage";
 }
+
+function logout() {
+  window.location.href = "/logout";
+}
 // ====================================================================================================
 // home.html (메인 페이지) 관련 JavaScript 함수
 // ====================================================================================================
