@@ -1,6 +1,5 @@
 // ==================================================
 // [lsr/feature/paging] home.html 전용 페이징 및 검색 스크립트
-// "수정보다는 추가" 원칙에 따라, 기존 HTML/JS를 건드리지 않고 기능을 덧씌웁니다.
 // ==================================================
 
 // 1. 상태 관리를 위한 전역 변수
@@ -8,31 +7,11 @@ let currentPage = 1;
 let currentKeyword = "";
 let currentCategory = "";
 
-// 2. 페이지가 완전히 로드되면 페이징 기능을 초기화하고 이벤트를 연결합니다.
+// 2. 페이지가 로드되면 기존 onload를 덮어쓰고, 새로운 이벤트 리스너를 연결합니다.
 document.addEventListener("DOMContentLoaded", () => {
 
-  // [lsr/fix] home.html의 displayProducts 함수를 덮어써서 페이징 객체와 배열 모두 처리 가능하도록 개선
-  if (typeof displayProducts === "function") {
-    const originalDisplayProducts = displayProducts; // 기존 함수 백업
-    displayProducts = function (productsToShow) {
-      // 데이터가 배열인지, 페이징 객체인지 확인하여 실제 상품 목록을 추출합니다.
-      const products = Array.isArray(productsToShow)
-        ? productsToShow
-        : (productsToShow && productsToShow.dtoList); // productsToShow가 null이 아닌지 확인
-
-      if (!products) {
-        console.warn("표시할 상품 데이터가 없습니다.", productsToShow);
-        // 상품이 없을 때 productGrid를 비워줍니다.
-        const productGrid = document.getElementById("productGrid");
-        if(productGrid) productGrid.innerHTML = "<p>상품이 없습니다.</p>";
-        return;
-      }
-      // 백업해둔 원래 함수에 정제된 데이터를 넣어 호출
-      originalDisplayProducts(products);
-    };
-  }
-
-  // 2-1. 기존 window.onload의 역할을 완전히 대체하는 새로운 함수를 정의합니다.
+  // 2-1. home.html의 window.onload 함수를 페이징을 지원하는 새 함수로 재정의(덮어쓰기)합니다.
+  // 이것이 실행되면, 기존 onload는 무시되고 이 함수가 대신 실행됩니다.
   window.onload = function() {
     console.log("home-paging.js에 의해 재정의된 onload가 실행됩니다.");
     currentKeyword = '';
@@ -40,7 +19,7 @@ document.addEventListener("DOMContentLoaded", () => {
     fetchAndDisplayProducts(1);
   };
 
-  // 2-2. 검색 버튼에 새로운 클릭 이벤트를 덧씌웁니다.
+  // 2-2. 검색 버튼에 새로운 클릭 이벤트를 연결합니다.
   const searchButton = document.querySelector(".search-container button");
   if (searchButton) {
     searchButton.onclick = (event) => {
@@ -63,7 +42,23 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
-  // 2-4. 카테고리 카드들에 새로운 클릭 이벤트를 덧씌웁니다.
+      currentCategory = "";
+      fetchAndDisplayProducts(1);
+    };
+  }
+
+  // 엔터 키 이벤트도 새로운 검색 기능으로 연결합니다.
+  const searchInput = document.getElementById("searchInput");
+  if (searchInput) {
+    searchInput.addEventListener("keypress", function (event) {
+      if (event.key === "Enter") {
+        event.preventDefault();
+        if(searchButton) searchButton.click();
+      }
+    });
+  }
+
+  // 카테고리 카드들에 새로운 클릭 이벤트를 덧씌웁니다.
   const categoryCards = document.querySelectorAll(".category-card");
   categoryCards.forEach((card) => {
     const categoryH3 = card.querySelector("h3");
@@ -83,7 +78,7 @@ document.addEventListener("DOMContentLoaded", () => {
     };
   });
 
-  // 2-5. '전체 보기' 버튼에도 새로운 이벤트를 연결합니다.
+  // '전체 보기' 버튼에도 새로운 이벤트를 연결합니다.
   const showAllBtn = document.querySelector(".show-all-btn");
   if (showAllBtn) {
     showAllBtn.onclick = (event) => {
@@ -115,8 +110,32 @@ function fetchAndDisplayProducts(page) {
       return response.json();
     })
     .then((pageData) => {
-      // 덮어쓴 displayProducts 함수를 호출합니다.
-      displayProducts(pageData); 
+      // home.html의 displayProducts를 직접 호출하지 않고, 여기서 화면을 직접 제어합니다.
+      const productGrid = document.getElementById("productGrid");
+      if (!productGrid) return;
+      
+      productGrid.innerHTML = ""; // 화면을 깨끗하게 비웁니다.
+      if (pageData.dtoList && pageData.dtoList.length > 0) {
+        pageData.dtoList.forEach((product) => {
+          const productCard = document.createElement("div");
+          productCard.className = "product-card";
+          productCard.innerHTML = `
+            <div class="product-image">${product.image || "이미지 없음"}</div>
+            <div class="product-info">
+                <h3 onclick="goToProductDetail(${product.productId})">${product.productName}</h3>
+                <p>카테고리: ${product.productTag}</p>
+                <div class="product-price">${Number(product.price).toLocaleString()}원</div>
+                <button class="add-to-cart-btn" onclick="addToCart(${product.productId}, '${product.productName}')">
+                    장바구니 담기
+                </button>
+            </div>
+          `;
+          productGrid.appendChild(productCard);
+        });
+      } else {
+        productGrid.innerHTML = "<p>상품이 없습니다.</p>";
+      }
+      
       renderPagination(pageData);
     })
     .catch((error) => {
