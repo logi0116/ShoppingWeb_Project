@@ -68,3 +68,4 @@ src/main/resources/application.properties
 
 # Local-specific properties
 application-local.properties
+.memo/PROJECT_PRINCIPLES.md
