@@ -10,8 +10,14 @@ let currentCategory = "";
 
 // 2. 페이지가 완전히 로드되면 페이징 기능을 초기화하고 이벤트를 연결합니다.
 document.addEventListener("DOMContentLoaded", () => {
-  // 2-1. 페이징된 상품 목록의 첫 페이지를 로드합니다.
-  fetchAndDisplayProducts(1);
+  // 2-1. 기존 window.onload의 역할을 완전히 대체하는 새로운 함수를 정의합니다.
+  // 이렇게 하면 home.html의 기존 코드를 수정하지 않고도 초기 로딩 동작을 변경할 수 있습니다.
+  window.onload = function() {
+    console.log("home-paging.js에 의해 재정의된 onload가 실행됩니다.");
+    currentKeyword = '';
+    currentCategory = '';
+    fetchAndDisplayProducts(1);
+  };
 
   // 2-2. 검색 버튼에 새로운 클릭 이벤트를 덧씌웁니다.
   const searchButton = document.querySelector(".search-container button");
