@@ -191,9 +191,11 @@ document.addEventListener("DOMContentLoaded", () => {
   const confirmPassword = document.getElementById("confirmPassword");
   const passwordHelp = document.getElementById("passwordHelp");
 
-  confirmPassword.addEventListener("input", function () {
-    if (password.value !== confirmPassword.value) {
-      passwordHelp.style.display = "block";
+  // [lsr/fix] confirmPassword 요소가 페이지에 존재할 때만 이벤트 리스너를 추가하도록 수정
+  if (password && confirmPassword && passwordHelp) {
+    confirmPassword.addEventListener("input", function () {
+      if (password.value !== confirmPassword.value) {
+        passwordHelp.style.display = "block";
     } else {
       passwordHelp.style.display = "none";
     }
@@ -207,6 +209,7 @@ document.addEventListener("DOMContentLoaded", () => {
       confirmPassword.focus();
     }
   });
+  }
 });
 
 // ====================================================================================================
