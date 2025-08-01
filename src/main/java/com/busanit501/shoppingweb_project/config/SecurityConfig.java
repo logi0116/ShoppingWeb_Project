@@ -39,15 +39,18 @@ public class SecurityConfig {
                                 .csrf(csrf -> csrf.disable())
                                 .authorizeHttpRequests(auth -> auth
                                                 // 인증 없이 접근 허용할 경로
+                                                .requestMatchers(HttpMethod.GET, "/api/image/display/{fileName}")
+                                                .permitAll()
                                                 .requestMatchers(HttpMethod.GET, "/api/products").permitAll()
                                                 .requestMatchers(HttpMethod.GET, "/api/products/{productId}")
                                                 .permitAll()
-                                                .requestMatchers(HttpMethod.GET, "/products/{id}").permitAll()
-                                                .requestMatchers(HttpMethod.GET, "/api/reviews/**").permitAll() // 모든
-                                                                                                                // 사용자가
-                                                                                                                // 리뷰를 볼
-                                                                                                                // 수 있도록
+                                                .requestMatchers(HttpMethod.GET, "/api/reviews/**").permitAll() // 리뷰 조회
+                                                                                                                // API는
+                                                                                                                // 누구나
+                                                                                                                // 접근
+                                                                                                                // 가능하도록
                                                                                                                 // 허용
+                                                .requestMatchers(HttpMethod.GET, "/products/{id}").permitAll()
                                                 .requestMatchers("/home", "/signup", "/login", "/css/**", "/js/**",
                                                                 "/images/**", "/api/check-id", "/api/products")
                                                 .permitAll()
