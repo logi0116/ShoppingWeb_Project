@@ -62,14 +62,40 @@
     <script th:src="@{/js/script.js}"></script>
 
     <script>
-        window.addEventListener('DOMContentLoaded', () => {
-            displayCartItems();
+        let currentUser = null;
+
+        document.addEventListener('DOMContentLoaded', async () => {
+            await fetchCurrentUser();
+            if (currentUser) {
+                displayCartItems();
+            } else {
+                // 비로그인 상태에서는 장바구니가 비어있다고 표시하고, 서버에 요청하지 않음
+                document.getElementById('cartItems').innerHTML = '<p>장바구니를 보려면 로그인이 필요합니다.</p>';
+                document.getElementById('totalPrice').textContent = '0';
+            }
         });
+
+        async function fetchCurrentUser() {
+            try {
+                const res = await fetch('/api/members/me');
+                if (!res.ok) throw new Error("비로그인 상태");
+                currentUser = await res.json();
+            } catch (err) {
+                currentUser = null;
+            }
+        }
 
         // 장바구니 목록 불러오기
         function displayCartItems() {
             fetch('/api/cart')
-                .then(res => res.json())
+                .then(res => {
+                    if (!res.ok) {
+                        // 인증 실패 시 로그인 페이지로 보낼 수 있음 (서버 리다이렉트가 이미 처리할 수도 있음)
+                        if (res.status === 401) window.location.href = '/login';
+                        throw new Error('장바구니 정보를 가져오지 못했습니다.');
+                    }
+                    return res.json();
+                })
                 .then(data => {
                     const cartItems = document.getElementById('cartItems');
                     const totalPrice = document.getElementById('totalPrice');
