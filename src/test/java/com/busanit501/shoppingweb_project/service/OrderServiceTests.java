@@ -16,44 +16,43 @@ import java.math.BigDecimal;
 @Log4j2
 public class OrderServiceTests {
 
-    @Autowired
-    private OrderService orderService;
+        @Autowired
+        private OrderService orderService;
 
-    @Autowired
-    private ProductRepository productRepository;
-    @Autowired
-    private CartItemRepository cartItemRepository;
+        @Autowired
+        private ProductRepository productRepository;
+        @Autowired
+        private CartItemRepository cartItemRepository;
 
-
-    @Test
-    public void testCreateOrder(){
-        //더미 데이터
-        Product product = Product.builder()
-                .productName("바지")
-                .price(BigDecimal.valueOf(40000))
-                .stock(10)
-                .build();
-        productRepository.save(product);
-        Product product2 = Product.builder()
-                .productName("겉옷")
-                .price(BigDecimal.valueOf(60000))
-                .stock(10)
-                .build();
-        productRepository.save(product2);
-        log.info("testCreateOrder에서 서비스 테스트중.." + product +product2);
-        CartItem cartItem = CartItem.builder()
-                .memberId(1L)
-                .product(product)
-                .quantity(2)
-                .build();
-        cartItemRepository.save(cartItem);
-        CartItem cartItem2 = CartItem.builder()
-                .memberId(1L)
-                .product(product2)
-                .quantity(2)
-                .build();
-        cartItemRepository.save(cartItem2);
-        log.info("testCreateOrder에서 서비스 테스트중.. cartItem : " + cartItem +cartItem2);
-        orderService.PurchaseFromCart(1L);
-    }
+        @Test
+        public void testCreateOrder() {
+                // 더미 데이터
+                Product product = Product.builder()
+                                .productName("바지")
+                                .price(BigDecimal.valueOf(40000))
+                                .stock(10)
+                                .build();
+                productRepository.save(product);
+                Product product2 = Product.builder()
+                                .productName("겉옷")
+                                .price(BigDecimal.valueOf(60000))
+                                .stock(10)
+                                .build();
+                productRepository.save(product2);
+                log.info("testCreateOrder에서 서비스 테스트중.." + product + product2);
+                CartItem cartItem = CartItem.builder()
+                                .memberId(1L)
+                                .product(product)
+                                .quantity(2)
+                                .build();
+                cartItemRepository.save(cartItem);
+                CartItem cartItem2 = CartItem.builder()
+                                .memberId(1L)
+                                .product(product2)
+                                .quantity(2)
+                                .build();
+                cartItemRepository.save(cartItem2);
+                log.info("testCreateOrder에서 서비스 테스트중.. cartItem : " + cartItem + cartItem2);
+                orderService.PurchaseFromCart(1L);
+        }
 }

@@ -82,8 +82,7 @@ public class ReviewServiceTests {
             Review review = result.get();
             log.info("수정 전 리뷰 내용 : , 평점 : " + review.getReviewContent(), review.getRating());
 
-            review.setReviewContent("수정된 리뷰 내용입니다."); // 리뷰 내용 수정
-            review.setRating(4); // 평점 수정
+            review.changeReview("수정된 리뷰 내용입니다.", 4); // 새로 만든 메서드로 내용과 평점을 한번에 수정
 
             reviewRepository.save(review);
             log.info("리뷰 수정 완료 - 내용 : , 평점 : " + review.getReviewContent(), review.getRating());

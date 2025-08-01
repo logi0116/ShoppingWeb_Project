@@ -27,7 +27,9 @@ public class ProductRepositoryTests {
     private ReviewRepository reviewRepository;
 
     @Test
-    public void insertProductsTest() {
+    @Transactional
+    @Commit
+    public void insertProductsAndReviewsTest() {
         // 검색 테스트를 위한 다양한 키워드 배열
         String[] seasons = { "봄", "여름", "가을", "겨울" };
         String[] itemTypes = { "티셔츠", "바지", "자켓", "원피스", "신발", "가방", "액세서리", "남방", "가디건", "손난로" };
@@ -42,23 +44,33 @@ public class ProductRepositoryTests {
 
         Random random = new Random();
 
-        // 테스트 실행 시, 상품 데이터 100개를 DB에 자동으로 추가합니다.
+        // 테스트 실행 시, 상품 데이터 100개와 각 상품별 리뷰를 DB에 자동으로 추가합니다.
         IntStream.rangeClosed(1, 100).forEach(i -> {
-            // 키워드 랜덤 조합
+            // ... (기존 상품 생성 로직과 동일)
             String season = seasons[random.nextInt(seasons.length)];
             String itemType = itemTypes[random.nextInt(itemTypes.length)];
             String color = colors[random.nextInt(colors.length)];
             String feature = features[random.nextInt(features.length)];
-
-            // 상품명과 설명 생성
             String productName = String.format("[%s] %s %s %s", season, color, feature, itemType);
+
             Product product = Product.builder()
                     .productName(productName)
                     .price(BigDecimal.valueOf(10000 + (random.nextInt(500) * 100)))
-                    .stock(random.nextInt(101) + 50) // 50 ~ 150
+                    .stock(random.nextInt(101) + 50)
                     .productTag(categories[i % categories.length])
                     .build();
             productRepository.save(product);
+
+            // --- 리뷰 생성 로직 추가 ---
+            int reviewCount = random.nextInt(5) + 1; // 상품당 1~5개의 리뷰를 랜덤으로 생성
+            IntStream.rangeClosed(1, reviewCount).forEach(j -> {
+                Review review = Review.builder()
+                        .reviewContent(product.getProductName() + "에 대한 테스트 리뷰입니다..." + j)
+                        .rating(random.nextInt(5) + 1) // 1~5점 랜덤 평점
+                        .product(product) // 방금 만든 상품과 연결
+                        .build();
+                reviewRepository.save(review);
+            });
         });
     }
 
