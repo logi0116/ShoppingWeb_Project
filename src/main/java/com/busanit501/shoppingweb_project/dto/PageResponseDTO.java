@@ -22,6 +22,12 @@ public class PageResponseDTO<E> {
         this.pageRequestDTO = pageRequestDTO;
         this.totalCount = (int) totalCount;
 
+        // totalCount가 0이면 페이지 계산을 할 필요가 없습니다.
+        if (totalCount <= 0) {
+            this.pageNumList = List.of(); // 빈 리스트
+            return;
+        }
+
         int end = (int) (Math.ceil(pageRequestDTO.getPage() / 10.0)) * 10;
         int start = end - 9;
         int last = (int) (Math.ceil((totalCount / (double) pageRequestDTO.getSize())));
