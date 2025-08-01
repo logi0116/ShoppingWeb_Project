@@ -1,4 +1,5 @@
 package com.busanit501.shoppingweb_project.domain;
+
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -12,7 +13,7 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-@ToString(exclude = "orderItems") // 순환 참조 방지
+@ToString(exclude = { "orderItems", "member" }) // 순환 참조 방지
 
 public class Order {
     @Id
@@ -20,8 +21,9 @@ public class Order {
     @Column(name = "orderId") // PK
     private Long orderId;
 
-    @Column(name = "memberId", nullable = false)
-    private Long memberId;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "member_id")
+    private Member member;
 
     @Column(name = "orderdate")
     private LocalDateTime orderDate;
@@ -33,7 +35,7 @@ public class Order {
     private String address;
     private String addressDetail;
     @Builder.Default
-    private int totalPrice=0;
+    private int totalPrice = 0;
     private String receiverName;
     private String receiverPhone;
     // 양방향 연관관계 설정 - 비주인
@@ -46,7 +48,8 @@ public class Order {
         this.orderItems.add(orderItem);
         orderItem.setOrder(this); // FK 설정
     }
-    public void setTotalPrice(int totalPrice){
+
+    public void setTotalPrice(int totalPrice) {
         this.totalPrice = totalPrice;
     }
 }
