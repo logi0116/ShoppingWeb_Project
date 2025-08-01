@@ -1,29 +1,43 @@
 package com.busanit501.shoppingweb_project.service;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.File;
 import java.io.IOException;
 import java.nio.file.*;
+import java.util.UUID;
 
 @Service
+
 public class FileUploadService {
 
-    private final String uploadDir = "C:/upload_images";
+    @Value("${com.busanit501.upload.path}")
+    private String UPLOAD_DIR;
 
     public String saveFile(MultipartFile file) throws IOException {
-        if (file.isEmpty()) {
-            throw new IllegalArgumentException("파일이 비어있습니다.");
+        try {
+            String uuid = UUID.randomUUID().toString();
+            String originalName = file.getOriginalFilename();
+
+            String savedName = uuid + "-" + originalName;
+
+            File uploadPath = new File(UPLOAD_DIR);
+            if (!uploadPath.exists()) {
+                uploadPath.mkdirs();
+            }
+
+            File dest = new File(uploadPath, savedName);
+            file.transferTo(dest);
+
+            return savedName;
+        } catch (IOException e) {
+            throw new RuntimeException("파일 저장 실패: " + file.getOriginalFilename(), e);
         }
+    }
 
-        String originalFilename = file.getOriginalFilename();
-        String savedFileName = System.currentTimeMillis() + "_" + originalFilename;
-
-        Path savePath = Paths.get(uploadDir, savedFileName);
-        Files.createDirectories(savePath.getParent());
-        file.transferTo(savePath.toFile());
-
-        // 클라이언트가 접근할 수 있는 URL 경로 반환
-        return "/images/" + savedFileName;
+    private String extractUUID(String fileName) {
+        return fileName.substring(0, fileName.lastIndexOf('.'));
     }
 }
