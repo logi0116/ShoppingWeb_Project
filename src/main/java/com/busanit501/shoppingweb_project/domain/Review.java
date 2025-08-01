@@ -27,11 +27,13 @@ public class Review {
     @Column(nullable = false, updatable = false)
     private LocalDateTime createdAt;
 
-
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "product_id", nullable = false)
     private Product product;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "member_mid")
+    private Member member;
 
     @PrePersist
     public void prePersist() {
@@ -43,5 +45,11 @@ public class Review {
         if (!product.getReviews().contains(this)) {
             product.getReviews().add(this);
         }
+    }
+
+    // 리뷰 내용, 평점 수정하는 기능.
+    public void changeReview(String reviewContent, int rating) {
+        this.reviewContent = reviewContent;
+        this.rating = rating;
     }
 }
