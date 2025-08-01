@@ -9,6 +9,8 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.annotation.Commit;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.math.BigDecimal;
 import java.util.Random;
 import java.util.stream.IntStream;
@@ -30,25 +32,31 @@ public class ProductRepositoryTests {
     @Transactional
     @Commit
     public void insertProductsAndReviewsTest() {
-        // 검색 테스트를 위한 다양한 키워드 배열
+        // 카테고리별 아이템 목록 정의
+        Map<ProductCategory, String[]> itemsByCategory = new HashMap<>();
+        itemsByCategory.put(ProductCategory.TOP, new String[] { "티셔츠", "남방", "가디건" });
+        itemsByCategory.put(ProductCategory.BOTTOM, new String[] { "바지", "스키니 진", "청바지" });
+        itemsByCategory.put(ProductCategory.OUTER, new String[] { "자켓", "코트", "바람막이" });
+        itemsByCategory.put(ProductCategory.DRESS, new String[] { "원피스", "드레스" });
+        itemsByCategory.put(ProductCategory.SHOES, new String[] { "신발", "운동화", "구두" });
+        itemsByCategory.put(ProductCategory.BAG, new String[] { "가방", "백팩", "핸드백" });
+        itemsByCategory.put(ProductCategory.ACC, new String[] { "액세서리", "모자", "벨트" });
+        itemsByCategory.put(ProductCategory.UNKNOWN, new String[] { "손난로", "특이한 아이템" });
+
         String[] seasons = { "봄", "여름", "가을", "겨울" };
-        String[] itemTypes = { "티셔츠", "바지", "자켓", "원피스", "신발", "가방", "액세서리", "남방", "가디건", "손난로" };
         String[] colors = { "레드", "블루", "그린", "블랙", "화이트", "핑크", "옐로우" };
         String[] features = { "오버핏", "슬림핏", "방수", "경량", "기모", "하와이안" };
 
-        ProductCategory[] categories = {
-                ProductCategory.TOP, ProductCategory.BOTTOM, ProductCategory.OUTER,
-                ProductCategory.DRESS, ProductCategory.SHOES, ProductCategory.BAG,
-                ProductCategory.ACC, ProductCategory.UNKNOWN
-        };
-
+        ProductCategory[] categories = ProductCategory.values();
         Random random = new Random();
 
         // 테스트 실행 시, 상품 데이터 100개와 각 상품별 리뷰를 DB에 자동으로 추가합니다.
         IntStream.rangeClosed(1, 100).forEach(i -> {
-            // ... (기존 상품 생성 로직과 동일)
+            ProductCategory currentCategory = categories[i % categories.length];
+            String[] possibleItems = itemsByCategory.get(currentCategory);
+
             String season = seasons[random.nextInt(seasons.length)];
-            String itemType = itemTypes[random.nextInt(itemTypes.length)];
+            String itemType = possibleItems[random.nextInt(possibleItems.length)];
             String color = colors[random.nextInt(colors.length)];
             String feature = features[random.nextInt(features.length)];
             String productName = String.format("[%s] %s %s %s", season, color, feature, itemType);
@@ -57,7 +65,7 @@ public class ProductRepositoryTests {
                     .productName(productName)
                     .price(BigDecimal.valueOf(10000 + (random.nextInt(500) * 100)))
                     .stock(random.nextInt(101) + 50)
-                    .productTag(categories[i % categories.length])
+                    .productTag(currentCategory)
                     .build();
             productRepository.save(product);
 
