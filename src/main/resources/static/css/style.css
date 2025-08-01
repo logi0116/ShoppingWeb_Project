@@ -186,6 +186,14 @@ body {
   color: #2c3e50;
   cursor: pointer;
   transition: color 0.3s;
+
+  /* [fix] 상품명 길이에 따른 카드 높이 불일치 문제 해결 */
+  min-height: 3.2em; /* 2줄 분량의 최소 높이 확보 (line-height * 2) */
+  display: -webkit-box;
+  -webkit-line-clamp: 2; /* 텍스트를 2줄로 제한 */
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .product-info h3:hover {
