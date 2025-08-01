@@ -38,9 +38,8 @@ public class OrderServicImpl implements OrderService {
         Member member = memberRepository.findById(memberId)
                 .orElseThrow(() -> new NoSuchElementException("OrderServcie에서 작업중 member객체에 null값이 있습니다."));
 
-
         Address address = addressRepository.findByMemberAndIsDefaultTrue(member);
-        UserinfoDTO userinfoDTo = UserinfoDTO.toUserinfoDTO(member,address);
+        UserinfoDTO userinfoDTo = UserinfoDTO.toUserinfoDTO(member, address);
 
         if (cartItems.isEmpty()) {
             throw new IllegalStateException("장바구니가 비어 있습니다.");
@@ -52,7 +51,7 @@ public class OrderServicImpl implements OrderService {
 
         // 주문 객체 생성
         Order order = Order.builder()
-                .memberId(memberId)
+                .member(member)
                 .orderDate(LocalDateTime.now())
                 .status(true) // 또는 enum 사용 시 OrderStatus.ORDERED
                 .address(userinfoDTo.getAddressId())
@@ -68,7 +67,7 @@ public class OrderServicImpl implements OrderService {
             total = total.add(itemTotal);
 
             OrderItem orderItem = OrderItem.builder()
-                    .productId(product.getProductId())
+                    .product(product)
                     .quantity(cart.getQuantity())
                     .price(itemTotal)
                     .build();
@@ -88,7 +87,6 @@ public class OrderServicImpl implements OrderService {
         return modelMapper.map(savedOrder, OrderDTO.class);
     }
 
-
     @Override
     public CartItemDTO AddCartItemFromProductDetail(CartItemDTO cartItemDTO) {
         CartItem cartItem = new ModelMapper().map(cartItemDTO, CartItem.class);
@@ -100,7 +98,13 @@ public class OrderServicImpl implements OrderService {
     @Override
     public List<OrderDTO> getOrderHistoryByMemberId(Long memberId) {
         log.info("OrderService에서 작업중 넘어온 memberId : " + memberId);
-        List<Order> orders = orderRepository.findByMemberId(memberId);
+        // memberId는 Long 타입이지만, Member 엔티티의 식별자인 mid는 String일 수 있으므로,
+        // 레포지토리에서 mid를 사용한다고 가정하고, memberId를 String으로 변환하여 전달합니다.
+        // 만약 Member의 PK가 Long 타입 id라면, findByMember_Id(memberId)를 사용해야 합니다.
+        // 여기서는 findByMember_Mid를 사용하도록 수정합니다.
+        Member member = memberRepository.findById(memberId)
+                .orElseThrow(() -> new NoSuchElementException("Member not found"));
+        List<Order> orders = orderRepository.findByMember(member);
         List<OrderDTO> orderDTOList = orders.stream().map(order -> {
             OrderDTO orderDTO = modelMapper.map(order, OrderDTO.class);
 
@@ -108,9 +112,10 @@ public class OrderServicImpl implements OrderService {
                     .map(orderItem -> {
                         OrderItemDTO dto = modelMapper.map(orderItem, OrderItemDTO.class);
 
-                        // 🔽 productId로 Product 조회해서 productName 세팅
-                        productRepository.findById(orderItem.getProductId())
-                                .ifPresent(product -> dto.setProductName(product.getProductName()));
+                        // 🔽 연관관계 매핑으로 Product를 직접 가져올 수 있으므로 DB 조회 불필요
+                        if (orderItem.getProduct() != null) {
+                            dto.setProductName(orderItem.getProduct().getProductName());
+                        }
 
                         return dto;
                     })
