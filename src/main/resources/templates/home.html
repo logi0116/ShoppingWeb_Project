@@ -290,10 +290,14 @@
             const response = await fetch('/api/cart', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ productId: productId, quantity: 1 })
+                body: JSON.stringify({ productId: productId, quantity: 1 }),
+                redirect: 'manual' // 리다이렉트를 수동으로 처리
             });
 
-            if (response.status === 401) { // Unauthorized (로그인 안됨)
+            // type 'opaqueredirect'는 CORS 정책 등으로 인해 리다이렉트 응답을 받았으나,
+            // 스크립트가 응답의 상세 내용을 볼 수 없을 때 발생합니다.
+            // Spring Security의 로그인 리다이렉트가 이 경우에 해당합니다.
+            if (response.type === 'opaqueredirect' || response.status === 401) {
                 alert("로그인이 필요합니다.");
                 window.location.href = "/login";
                 return;
@@ -305,9 +309,7 @@
             }
 
             alert(`🛒 ${productName}이(가) 장바구니에 추가되었습니다.`);
-            // updateCartCount(); // 이 함수는 /api/cart/count API를 사용하도록 변경 필요
-            const cartCountSpan = document.getElementById('cartCount');
-            cartCountSpan.textContent = parseInt(cartCountSpan.textContent) + 1;
+            await updateCartCount();
 
         } catch (err) {
             console.error(err);
