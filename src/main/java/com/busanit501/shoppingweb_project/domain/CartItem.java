@@ -28,7 +28,7 @@ public class CartItem {
     // 수량
     @Column(nullable = false)
     @Builder.Default
-    private int quantity=1;
+    private int quantity = 1;
 
     public void setCartItems(Product product) {
         this.product = product;
@@ -38,6 +38,7 @@ public class CartItem {
             product.getCartItems().add(this);
         }
     }
+
     public void changeQuantity(int newQuantity) {
         this.quantity = newQuantity;
     }
