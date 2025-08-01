@@ -31,11 +31,12 @@ public class CartItemServiceImpl implements CartItemService {
     CartItemRepository cartItemRepository;
     @Autowired
     ProductService productService;
+
     private Long getCurrentMemberId() {
-        CustomUserDetails userDetails = (CustomUserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        CustomUserDetails userDetails = (CustomUserDetails) SecurityContextHolder.getContext().getAuthentication()
+                .getPrincipal();
         return userDetails.getMemberId();
     }
-
 
     // 장바구니 조회
     public List<CartItemDTO> getCartItems() {
@@ -68,24 +69,32 @@ public class CartItemServiceImpl implements CartItemService {
                     .build();
         }
         cartItemRepository.save(cartItem);
-        return CartItemDTO.fromEntity(cartItem,productDTO);
+        return CartItemDTO.fromEntity(cartItem, productDTO);
     }
 
     // 수량 변경
     @Transactional
-    public CartItemDTO updateQuantity( Long memberId , Long productId ,int change) {
+    public CartItemDTO updateQuantity(Long memberId, Long productId, int change) {
         Product product = productRepository.findByProductId(productId);
         ProductDTO productDTO = productService.getProductById(productId);
 
         CartItem item = cartItemRepository.findByMemberIdAndProduct(memberId, product)
                 .orElseThrow(() -> new IllegalArgumentException("장바구니에 해당 상품이 없습니다."));
+
+        // 재고 확인 로직: 수량을 늘릴 때(change > 0), 현재 수량과 더하려는 수량의 합이 재고보다 큰지 확인합니다.
+        if (change > 0 && item.getQuantity() + change > product.getStock()) {
+            // 재고가 부족하면 예외를 발생시켜 요청을 중단시킵니다.
+            throw new IllegalStateException("재고가 부족합니다.");
+        }
+
         log.info("CartController에서 작업중 업데이트되기 전 CartItemDTO : " + item);
         item.increaseQuantity(change);
         if (item.getQuantity() <= 0) {
             cartItemRepository.delete(item);
         }
-        return CartItemDTO.fromEntity(item , productDTO);
+        return CartItemDTO.fromEntity(item, productDTO);
     }
+
     // 회원 ID로 장바구니 아이템 조회
     public List<CartItemDTO> getCartItemsByMemberId(Long memberId) {
         List<CartItem> cartItems = cartItemRepository.findByMemberId(memberId);
@@ -104,9 +113,10 @@ public class CartItemServiceImpl implements CartItemService {
         Optional<CartItem> cartItem = cartItemRepository.findByMemberIdAndProduct(memberId, product);
         cartItem.ifPresent(cartItemRepository::delete);
         // cartItem.ifPresent(cartItem -> {
-        //    cartItemRepository.delete(cartItem);
-        //}); 이거랑 똑같은 기능
+        // cartItemRepository.delete(cartItem);
+        // }); 이거랑 똑같은 기능
     }
+
     // 단일 삭제
     public void deleteCartItem(Long productId) {
         Long memberId = getCurrentMemberId();
@@ -118,5 +128,10 @@ public class CartItemServiceImpl implements CartItemService {
     public void clearCart(Long id) {
         Long memberId = getCurrentMemberId();
         cartItemRepository.deleteByMemberId(memberId);
+    }
+
+    @Override
+    public long getCartItemCountByMemberId(Long memberId) {
+        return cartItemRepository.countByMemberId(memberId);
     }
 }
