@@ -10,6 +10,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
+import java.util.List;
 
 @Data
 @Builder
@@ -21,25 +22,22 @@ public class ProductDTO {
 
     @NotEmpty
     private String productName;
+
     @NotNull
     private BigDecimal price;
-    private int stock;
-    private String image;
-    private ProductCategory productTag;
 
-    // [lsr/feature/rating] 리뷰 개수와 평균 평점을 담을 필드 추가
+    private int stock;
+
+    private ProductCategory productTag;
+    private String thumbnailFileName;
+    private List<String> fileNames;
+
+    //리뷰 개수와 평균 평점
     private long reviewCount;
     private double averageRating;
 
-    public static ProductDTO fromEntity(Product product) {
-        return ProductDTO.builder()
-                .productId(product.getProductId())
-                .productName(product.getProductName())
-                .price(product.getPrice())
-                .stock(product.getStock())
-                .image(product.getImage())
-                .productTag(ProductCategory.valueOf(product.getProductTag().name())) // Enum을 문자열로 변환
-                .build();
-    }
 
+    public void setThumbnailFileName(String fileName) {
+        this.thumbnailFileName = fileName;
+    }
 }
