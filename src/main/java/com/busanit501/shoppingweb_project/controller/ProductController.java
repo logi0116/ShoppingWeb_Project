@@ -1,15 +1,22 @@
 package com.busanit501.shoppingweb_project.controller;
 
+import com.busanit501.shoppingweb_project.domain.enums.ProductCategory;
 import com.busanit501.shoppingweb_project.dto.ProductDTO;
+import com.busanit501.shoppingweb_project.dto.ProductDTO;
+import com.busanit501.shoppingweb_project.service.ProductService;
 import com.busanit501.shoppingweb_project.dto.PageRequestDTO;
 import com.busanit501.shoppingweb_project.dto.PageResponseDTO;
-import com.busanit501.shoppingweb_project.service.ProductService;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
+
+import java.math.BigDecimal;
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/products")
@@ -20,40 +27,41 @@ public class ProductController {
     private final ProductService productService;
 
     /**
-     * [lsr/feature/paging] 상품 목록/검색 페이징 API
-     * 이유: 기존의 목록 조회, 카테고리별 조회, 검색 기능을 페이징이 가능한 단일 API로 통합합니다.
+     * 페이징 처리된 상품 목록을 반환합니다. (메인 페이지용)
+     * 프론트엔드의 home-paging.js가 이 API를 호출합니다.
+     * 주소: /api/products?page=1&size=10...
      * 
-     * @param pageRequestDTO 페이징 및 검색 조건(keyword, type)을 담고 있습니다.
-     * @return 페이징된 상품 목록 데이터
+     * @param pageRequestDTO page, size, type, keyword 등의 조건을 담습니다.
+     * @return 페이징된 상품 데이터
      */
     @GetMapping
-    public PageResponseDTO<ProductDTO> getProductList(PageRequestDTO pageRequestDTO) {
-        log.info("getProductList ....." + pageRequestDTO);
-        return productService.getProductList(pageRequestDTO);
+    public ResponseEntity<PageResponseDTO<ProductDTO>> getProductList(PageRequestDTO pageRequestDTO) {
+        log.info("getProductList (paging) 호출: " + pageRequestDTO);
+        PageResponseDTO<ProductDTO> responseDTO = productService.getProductList(pageRequestDTO);
+        return ResponseEntity.ok(responseDTO);
+    }
+
+    /**
+     * 전체 상품 목록을 반환합니다. (내부 관리용 또는 페이징이 필요 없는 경우)
+     * 주소: /api/products/all
+     * 
+     * @return 전체 상품 리스트
+     */
+    @GetMapping("/all")
+    public ResponseEntity<List<ProductDTO>> getAllProducts() {
+        log.info("getAllProducts (no paging) 호출");
+        List<ProductDTO> products = productService.getAllProducts();
+        return ResponseEntity.ok(products);
     }
 
     /*
-     * ==================================================
-     * [lsr/feature/paging] 기존 코드 보존 (주석 처리)
-     * - 이유: 아래 메소드들은 페이징 기능이 없는 버전이며, 새로운 getProductList 메소드로 통합되었습니다.
-     * ==================================================
+     * [기존 코드 설명]
+     * 아래의 searchProducts와 기존 getAllProducts(category 처리 로직 포함)는
+     * 새로운 getProductList(PageRequestDTO) 방식으로 모두 통합되었습니다.
+     * 따라서 아래 코드들은 더 이상 필요하지 않습니다.
      */
-    // @GetMapping // 화면에 렌더링 될 때 category를 선택하지 않으면 모든 상품을 불러오고
-    // // category를 선택하면 category에 해당 되는 상품만 불러온다.
-    // public List<ProductDTO> getAllProducts(@RequestParam(required = false) String
-    // category) {
-    // if(category != null && !category.isBlank()){
-    // log.info(category + "데이터를 불러옵니다.");
-    // return productService.getProductsByCategory(category);
-    // }
-    // List<ProductDTO> products = productService.getAllProducts();
-    // log.info("모든 데이터를 불러옵니다."+ products);
-    // return products;
-    // }
-    //
     // @GetMapping("/search")
-    // public List<ProductDTO> searchProducts(@RequestParam String keyword){
-    // // @RequestParam => URL 에 붙은 ?key=value형식의 값을 받아오게 암시해주는 어노테이션
+    // public List<ProductDTO> searchProducts(@RequestParam String keyword) {
     // List<ProductDTO> products = productService.searchProducts(keyword);
     // log.info(keyword + "가 포함된 데이터 : "+keyword);
     // return products;
@@ -66,10 +74,17 @@ public class ProductController {
     //// productService.getProductById(productId) => productDTO
     // }
 
-    @PostMapping
-    public ResponseEntity<ProductDTO> createProduct(@RequestBody ProductDTO requestDto) {
-        ProductDTO responseDto = productService.createProduct(requestDto);
-        return ResponseEntity.status(HttpStatus.CREATED).body(responseDto);
+    @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<?> createProduct(
+            @RequestParam String productName,
+            @RequestParam BigDecimal price,
+            @RequestParam int stock,
+            @RequestParam ProductCategory productTag,
+            @RequestParam(value = "thumbnail", required = false) MultipartFile thumbnail,
+            @RequestParam(value = "details", required = false) List<MultipartFile> details) {
+
+        productService.createProductWithImages(productName, price, stock, productTag, thumbnail, details);
+        return ResponseEntity.ok().build();
     }
 
     // @GetMapping
@@ -80,13 +95,14 @@ public class ProductController {
 
     @GetMapping("/{productId}")
     public ResponseEntity<ProductDTO> getProduct(@PathVariable Long productId) {
-        ProductDTO product = productService.getProductById(productId);
-        return ResponseEntity.ok(product);
+        ProductDTO productDTO = productService.getProductById(productId);
+        return ResponseEntity.ok(productDTO);
     }
 
     @PutMapping("/{productId}")
     public ResponseEntity<ProductDTO> updateProduct(@PathVariable Long productId, @RequestBody ProductDTO requestDto) {
-        log.info("ProductControllerRestAPI에서 작업중 화면에서 가져온 데이터 확인중 : productId "+ productId+"productDTO : "+ requestDto.getProductName());
+        log.info("ProductControllerRestAPI에서 작업중 화면에서 가져온 데이터 확인중 : productId " + productId + "productDTO : "
+                + requestDto.getProductName());
         ProductDTO updatedProduct = productService.updateProduct(productId, requestDto);
         return ResponseEntity.ok(updatedProduct);
     }
