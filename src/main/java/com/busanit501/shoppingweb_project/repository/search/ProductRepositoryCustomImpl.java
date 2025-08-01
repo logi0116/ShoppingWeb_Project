@@ -66,8 +66,9 @@ public class ProductRepositoryCustomImpl implements ProductRepositoryCustom {
                 .from(product)
                 .where(booleanBuilder);
 
-        long total = countQuery.fetchOne();
+        Long total = countQuery.fetchOne(); // 결과가 null일 수 있으므로 Long 타입으로 받습니다.
 
-        return new PageImpl<>(content, pageable, total);
+        // total이 null이면 0L(0 long)을, 아니면 실제 total 값을 사용합니다.
+        return new PageImpl<>(content, pageable, (total != null) ? total : 0L);
     }
 }
