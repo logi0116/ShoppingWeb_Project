@@ -217,7 +217,7 @@
             const productCard = document.createElement('div');
             productCard.className = 'product-card';
             productCard.innerHTML = `
-                <img src="${product.thumbnailFileName ? '/api/image/display/' + product.thumbnailFileName : '/images/default_product.png'}"
+                <img src="${product.thumbnailFileName ? '/images/products/' + product.thumbnailFileName : '/images/default_product.png'}"
                      alt="${product.productName}" class="product-image" onclick="goToProductDetail(${product.productId})"/>
                 <div class="product-info">
                     <h3 onclick="goToProductDetail(${product.productId})">${product.productName}</h3>

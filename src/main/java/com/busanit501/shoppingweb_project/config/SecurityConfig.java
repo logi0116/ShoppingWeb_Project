@@ -26,11 +26,6 @@ public class SecurityConfig {
                 return new CustomOAuth2UserService(memberRepository, passwordEncoder);
         }
 
-        // 비밀번호 암호화에 사용될 Bean
-        @Bean
-        public PasswordEncoder passwordEncoder() {
-                return new BCryptPasswordEncoder();
-        }
 
         // 보안 필터 체인 설정 (접근 권한, 로그인/로그아웃 설정 등)
         @Bean

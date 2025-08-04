@@ -1,6 +1,7 @@
 package com.busanit501.shoppingweb_project.repository;
 
 import com.busanit501.shoppingweb_project.domain.Product;
+import com.busanit501.shoppingweb_project.domain.ProductImage;
 import com.busanit501.shoppingweb_project.domain.Review;
 import com.busanit501.shoppingweb_project.domain.enums.ProductCategory;
 import org.junit.jupiter.api.Test;
@@ -12,10 +13,12 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.HashMap;
 import java.util.Map;
 import java.math.BigDecimal;
+import java.util.List;
 import java.util.Random;
+import java.util.stream.Collectors;
 import java.util.stream.IntStream;
-
-@SpringBootTest
+ 
+ @SpringBootTest
 public class ProductRepositoryTests {
 
     // ProductRepository 주입
@@ -49,9 +52,14 @@ public class ProductRepositoryTests {
 
         ProductCategory[] categories = ProductCategory.values();
         Random random = new Random();
-
-        // 테스트 실행 시, 상품 데이터 100개와 각 상품별 리뷰를 DB에 자동으로 추가합니다.
-        IntStream.rangeClosed(1, 100).forEach(i -> {
+ 
+        // 샘플 이미지 파일 목록 (src/main/resources/static/images/products/ 에 위치해야 함)
+        List<String> sampleImageFiles = IntStream.rangeClosed(1, 100)
+                .mapToObj(num -> String.format("sample%03d.jpg", num))
+                .collect(Collectors.toList());
+ 
+         // 테스트 실행 시, 상품 데이터 100개와 각 상품별 리뷰를 DB에 자동으로 추가합니다.
+         IntStream.rangeClosed(1, 100).forEach(i -> {
             ProductCategory currentCategory = categories[i % categories.length];
             String[] possibleItems = itemsByCategory.get(currentCategory);
 
@@ -68,9 +76,29 @@ public class ProductRepositoryTests {
                     .productTag(currentCategory)
                     .build();
             productRepository.save(product);
+ 
+            // --- 이미지 생성 로직 추가 ---
+            // 각 상품에 대해 3개의 테스트 이미지를 생성합니다.
+            for (int j = 0; j < 3; j++) {
+                // 첫 번째 이미지를 썸네일로 설정합니다. (j == 0)
+                boolean isThumbnail = (j == 0);
 
-            // --- 리뷰 생성 로직 추가 ---
-            int reviewCount = random.nextInt(5) + 1; // 상품당 1~5개의 리뷰를 랜덤으로 생성
+                // ProductImage 객체를 생성하고, 파일 이름과 순서, 썸네일 여부를 설정합니다.
+                String randomImageName = sampleImageFiles.get(random.nextInt(sampleImageFiles.size()));
+                ProductImage productImage = ProductImage.builder()
+                        .fileName(randomImageName)
+                        .ord(j)
+                        .thumbnail(isThumbnail)
+                        .build();
+
+                // Product 객체에 생성된 이미지를 추가합니다.
+                product.addImage(productImage);
+            }
+            productRepository.save(product);
+
+ 
+             // --- 리뷰 생성 로직 추가 ---
+             int reviewCount = random.nextInt(5) + 1; // 상품당 1~5개의 리뷰를 랜덤으로 생성
             IntStream.rangeClosed(1, reviewCount).forEach(j -> {
                 Review review = Review.builder()
                         .reviewContent(product.getProductName() + "에 대한 테스트 리뷰입니다..." + j)

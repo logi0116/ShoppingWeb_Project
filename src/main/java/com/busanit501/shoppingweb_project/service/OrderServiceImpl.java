@@ -19,10 +19,9 @@ import java.util.stream.Collectors;
 
 @Service
 @Log4j2
-@Builder
 @RequiredArgsConstructor
 @Transactional()
-public class OrderServicImpl implements OrderService {
+public class OrderServiceImpl implements OrderService {
 
     private final ModelMapper modelMapper;
     private final CartItemRepository cartItemRepository;
